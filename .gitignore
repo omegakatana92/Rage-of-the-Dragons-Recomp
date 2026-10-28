@@ -1,0 +1,16 @@
+# ROM data and anything generated from it
+roms/
+!roms/README.txt
+build*/
+generated/
+build-appimage/
+entries*.txt
+*.log
+
+# Local test output
+*.png
+!packaging/appimage/rotd.png
+*.wav
+
+# Distribution binaries are build outputs, not source
+dist/

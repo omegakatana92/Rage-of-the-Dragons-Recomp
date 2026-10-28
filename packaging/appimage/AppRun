@@ -1,0 +1,52 @@
+#!/bin/sh
+# AppRun for Rage of the Dragons.
+#
+# The AppImage contains the recompiled player and SDL2, never the game or
+# system ROMs.  ROM files are looked up in this order:
+#   $ROTD_ROM_PATH
+#   <AppImage directory>/roms
+#   ~/.local/share/ROTD/roms
+# A BIOS directory can be set with $ROTD_BIOS_PATH; by default the prepared
+# ROM directory also holds the BIOS files.
+set -e
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export SDL_RENDER_SCALE_QUALITY=0
+
+# Fullscreen desktop is the right mode in Steam Gaming Mode and on a Deck;
+# windowed users can set NEOGEORECOMP_FULLSCREEN=0.
+if [ -z "${NEOGEORECOMP_FULLSCREEN+x}" ]; then
+    export NEOGEORECOMP_FULLSCREEN=1
+fi
+
+ROM="${ROTD_ROM_PATH:-}"
+if [ -z "$ROM" ]; then
+    APPIMAGE_DIR=""
+    if [ -n "${APPIMAGE:-}" ]; then
+        APPIMAGE_DIR="$(cd "$(dirname "$APPIMAGE")" && pwd)"
+    fi
+    for d in "$HERE/roms" "$APPIMAGE_DIR/roms" "$HOME/.local/share/ROTD/roms"; do
+        if [ -n "$d" ] && [ -f "$d/264-p1.p1" ]; then
+            ROM="$d"
+            break
+        fi
+    done
+fi
+
+if [ -z "$ROM" ]; then
+    cat >&2 <<'EOF'
+ROTD: game ROM files were not found.
+
+Put the prepared files in ~/.local/share/ROTD/roms, or set ROTD_ROM_PATH.
+Prepare them once from your own MAME zips with:
+
+  ./prepare-roms.sh /path/to/rotd.zip /path/to/neogeo.zip
+
+This project does not include or download ROMs or BIOS files.
+EOF
+    exit 1
+fi
+
+BIOS="${ROTD_BIOS_PATH:-$ROM}"
+exec "$HERE/usr/bin/rotd" --rom-path "$ROM" --bios-path "$BIOS" "$@"

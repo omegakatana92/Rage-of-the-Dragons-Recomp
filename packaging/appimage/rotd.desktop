@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Rage of the Dragons
+Comment=Native Neo Geo recompilation
+Exec=rotd
+Icon=rotd
+Terminal=false
+Categories=Game;ArcadeGame;
+StartupNotify=false
+StartupWMClass=rotd
